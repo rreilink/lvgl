@@ -614,6 +614,13 @@ static void indev_proc_press(lv_indev_proc_t * proc)
         }
 
         proc->act_obj = pr_obj;           /*Save the pressed object*/
+
+        /*If the last object is present the focus is changing away. Send a signal. */
+        if(proc->last_pressed != NULL) {
+        	proc->last_pressed->signal_func(proc->last_pressed, LV_SIGNAL_PRESS_LEAVE, indev_act);
+        	proc->last_pressed = NULL;
+        }
+
         proc->last_obj = proc->act_obj;   /*Refresh the last_obj*/
 
         if(proc->act_obj != NULL) {
@@ -721,6 +728,8 @@ static void indev_proc_release(lv_indev_proc_t * proc)
         else {
             proc->act_obj->signal_func(proc->act_obj, LV_SIGNAL_RELEASED, indev_act);
         }
+
+        proc->last_pressed = proc->act_obj;
 
         if(proc->reset_query != 0) return;
 

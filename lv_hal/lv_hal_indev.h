@@ -78,6 +78,7 @@ typedef struct _lv_indev_proc_t {
             lv_point_t drag_sum;                /*Count the dragged pixels to check LV_INDEV_DRAG_LIMIT*/
             struct _lv_obj_t * act_obj;
             struct _lv_obj_t * last_obj;
+            struct _lv_obj_t * last_pressed;	/*Last pressed object. Set upon release.*/
 
             /*Flags*/
             uint8_t drag_range_out      :1;
