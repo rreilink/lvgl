@@ -740,6 +740,8 @@ static lv_res_t lv_ddlist_scrl_signal(lv_obj_t * scrl, lv_signal_t sign, void * 
     } else if(sign == LV_SIGNAL_CLEANUP) {
         lv_ddlist_ext_t * ext = lv_obj_get_ext_attr(ddlist);
         ext->label = NULL;      /*The label is already deleted*/
+    } else if(sign == LV_SIGNAL_PRESS_LEAVE) {
+    	lv_ddlist_close(ddlist, true);
     }
 
     return res;
