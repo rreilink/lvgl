@@ -89,11 +89,11 @@ lv_obj_t * lv_btn_create(lv_obj_t * par, const lv_obj_t * copy)
 
     ext->state = LV_BTN_STATE_REL;
 
-    ext->styles[LV_BTN_STATE_REL]     = &lv_style_btn_rel;
-    ext->styles[LV_BTN_STATE_PR]      = &lv_style_btn_pr;
-    ext->styles[LV_BTN_STATE_TGL_REL] = &lv_style_btn_tgl_rel;
-    ext->styles[LV_BTN_STATE_TGL_PR]  = &lv_style_btn_tgl_pr;
-    ext->styles[LV_BTN_STATE_INA]     = &lv_style_btn_ina;
+    LV_REF_INIT(ext->styles[LV_BTN_STATE_REL], &lv_style_btn_rel);
+    LV_REF_INIT(ext->styles[LV_BTN_STATE_PR], &lv_style_btn_pr);
+    LV_REF_INIT(ext->styles[LV_BTN_STATE_TGL_REL], &lv_style_btn_tgl_rel);
+    LV_REF_INIT(ext->styles[LV_BTN_STATE_TGL_PR], &lv_style_btn_tgl_pr);
+    LV_REF_INIT(ext->styles[LV_BTN_STATE_INA], &lv_style_btn_ina);
 
     ext->toggle = 0;
 #if LV_USE_ANIMATION && LV_BTN_INK_EFFECT
@@ -136,7 +136,7 @@ lv_obj_t * lv_btn_create(lv_obj_t * par, const lv_obj_t * copy)
         ext->ink_wait_time = copy_ext->ink_wait_time;
         ext->ink_out_time  = copy_ext->ink_out_time;
 #endif
-        memcpy(ext->styles, copy_ext->styles, sizeof(ext->styles));
+        LV_REF_MEMCPY(ext->styles, copy_ext->styles, sizeof(ext->styles));
 
         /*Refresh the style with new signal function*/
         lv_obj_refresh_style(new_btn);
@@ -259,11 +259,11 @@ void lv_btn_set_style(lv_obj_t * btn, lv_btn_style_t type, const lv_style_t * st
     lv_btn_ext_t * ext = lv_obj_get_ext_attr(btn);
 
     switch(type) {
-        case LV_BTN_STYLE_REL: ext->styles[LV_BTN_STATE_REL] = style; break;
-        case LV_BTN_STYLE_PR: ext->styles[LV_BTN_STATE_PR] = style; break;
-        case LV_BTN_STYLE_TGL_REL: ext->styles[LV_BTN_STATE_TGL_REL] = style; break;
-        case LV_BTN_STYLE_TGL_PR: ext->styles[LV_BTN_STATE_TGL_PR] = style; break;
-        case LV_BTN_STYLE_INA: ext->styles[LV_BTN_STATE_INA] = style; break;
+        case LV_BTN_STYLE_REL:     LV_REF_REPLACE(ext->styles[LV_BTN_STATE_REL], style); break;
+        case LV_BTN_STYLE_PR:      LV_REF_REPLACE(ext->styles[LV_BTN_STATE_PR], style); break;
+        case LV_BTN_STYLE_TGL_REL: LV_REF_REPLACE(ext->styles[LV_BTN_STATE_TGL_REL], style); break;
+        case LV_BTN_STYLE_TGL_PR:  LV_REF_REPLACE(ext->styles[LV_BTN_STATE_TGL_PR], style); break;
+        case LV_BTN_STYLE_INA:     LV_REF_REPLACE(ext->styles[LV_BTN_STATE_INA], style); break;
     }
 
     /*Refresh the object with the new style*/
@@ -628,6 +628,10 @@ static lv_res_t lv_btn_signal(lv_obj_t * btn, lv_signal_t sign, void * param)
             ink_obj = NULL;
         }
 #endif
+        
+        LV_REF_RELEASE_MULTIPLE(ext->styles, sizeof(ext->styles));
+
+
     } else if(sign == LV_SIGNAL_GET_TYPE) {
         lv_obj_type_t * buf = param;
         uint8_t i;

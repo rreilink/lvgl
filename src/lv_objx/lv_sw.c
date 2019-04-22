@@ -71,8 +71,8 @@ lv_obj_t * lv_sw_create(lv_obj_t * par, const lv_obj_t * copy)
 #if LV_USE_ANIMATION
     ext->anim_time = 0;
 #endif
-    ext->style_knob_off = ext->slider.style_knob;
-    ext->style_knob_on  = ext->slider.style_knob;
+    LV_REF_INIT(ext->style_knob_off, ext->slider.style_knob);
+    LV_REF_INIT(ext->style_knob_on, ext->slider.style_knob);
 
     /*The signal and design functions are not copied so set them here*/
     lv_obj_set_signal_cb(new_sw, lv_sw_signal);
@@ -98,8 +98,8 @@ lv_obj_t * lv_sw_create(lv_obj_t * par, const lv_obj_t * copy)
     /*Copy an existing switch*/
     else {
         lv_sw_ext_t * copy_ext = lv_obj_get_ext_attr(copy);
-        ext->style_knob_off    = copy_ext->style_knob_off;
-        ext->style_knob_on     = copy_ext->style_knob_on;
+        LV_REF_REPLACE(ext->style_knob_off, copy_ext->style_knob_off);
+        LV_REF_REPLACE(ext->style_knob_on , copy_ext->style_knob_on);
 #if LV_USE_ANIMATION
         ext->anim_time = copy_ext->anim_time;
 #endif
@@ -187,11 +187,11 @@ void lv_sw_set_style(lv_obj_t * sw, lv_sw_style_t type, const lv_style_t * style
         case LV_SLIDER_STYLE_BG: lv_slider_set_style(sw, LV_SLIDER_STYLE_BG, style); break;
         case LV_SLIDER_STYLE_INDIC: lv_bar_set_style(sw, LV_SLIDER_STYLE_INDIC, style); break;
         case LV_SW_STYLE_KNOB_OFF:
-            ext->style_knob_off = style;
+            LV_REF_REPLACE(ext->style_knob_off, style);
             if(lv_sw_get_state(sw) == 0) lv_slider_set_style(sw, LV_SLIDER_STYLE_KNOB, style);
             break;
         case LV_SW_STYLE_KNOB_ON:
-            ext->style_knob_on = style;
+            LV_REF_REPLACE(ext->style_knob_on, style);
             if(lv_sw_get_state(sw) != 0) lv_slider_set_style(sw, LV_SLIDER_STYLE_KNOB, style);
             break;
     }
@@ -278,7 +278,9 @@ static lv_res_t lv_sw_signal(lv_obj_t * sw, lv_signal_t sign, void * param)
     sw->event_cb = event_cb;
 
     if(sign == LV_SIGNAL_CLEANUP) {
-        /*Nothing to cleanup. (No dynamically allocated memory in 'ext')*/
+        LV_REF_RELEASE(ext->style_knob_off);
+        LV_REF_RELEASE(ext->style_knob_on);
+        /*Nothing else to cleanup. (No dynamically allocated memory in 'ext')*/
     } else if(sign == LV_SIGNAL_PRESSED) {
 
         /*Save the x coordinate of the pressed point to see if the switch was slid*/

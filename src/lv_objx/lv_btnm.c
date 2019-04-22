@@ -88,11 +88,11 @@ lv_obj_t * lv_btnm_create(lv_obj_t * par, const lv_obj_t * copy)
     ext->map_p                            = NULL;
     ext->recolor                          = 0;
     ext->one_toggle                       = 0;
-    ext->styles_btn[LV_BTN_STATE_REL]     = &lv_style_btn_rel;
-    ext->styles_btn[LV_BTN_STATE_PR]      = &lv_style_btn_pr;
-    ext->styles_btn[LV_BTN_STATE_TGL_REL] = &lv_style_btn_tgl_rel;
-    ext->styles_btn[LV_BTN_STATE_TGL_PR]  = &lv_style_btn_tgl_pr;
-    ext->styles_btn[LV_BTN_STATE_INA]     = &lv_style_btn_ina;
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_REL], &lv_style_btn_rel);
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_PR], &lv_style_btn_pr);
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_TGL_REL], &lv_style_btn_tgl_rel);
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_TGL_PR], &lv_style_btn_tgl_pr);
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_INA], &lv_style_btn_ina);
 
     if(ancestor_design_f == NULL) ancestor_design_f = lv_obj_get_design_cb(new_btnm);
 
@@ -120,7 +120,7 @@ lv_obj_t * lv_btnm_create(lv_obj_t * par, const lv_obj_t * copy)
     /*Copy an existing object*/
     else {
         lv_btnm_ext_t * copy_ext = lv_obj_get_ext_attr(copy);
-        memcpy(ext->styles_btn, copy_ext->styles_btn, sizeof(ext->styles_btn));
+        LV_REF_MEMCPY(ext->styles_btn, copy_ext->styles_btn, sizeof(ext->styles_btn));
         lv_btnm_set_map(new_btnm, lv_btnm_get_map_array(copy));
     }
 
@@ -310,23 +310,23 @@ void lv_btnm_set_style(lv_obj_t * btnm, lv_btnm_style_t type, const lv_style_t *
     switch(type) {
         case LV_BTNM_STYLE_BG: lv_obj_set_style(btnm, style); break;
         case LV_BTNM_STYLE_BTN_REL:
-            ext->styles_btn[LV_BTN_STATE_REL] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_REL], style);
             lv_obj_invalidate(btnm);
             break;
         case LV_BTNM_STYLE_BTN_PR:
-            ext->styles_btn[LV_BTN_STATE_PR] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_PR], style);
             lv_obj_invalidate(btnm);
             break;
         case LV_BTNM_STYLE_BTN_TGL_REL:
-            ext->styles_btn[LV_BTN_STATE_TGL_REL] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_TGL_REL], style);
             lv_obj_invalidate(btnm);
             break;
         case LV_BTNM_STYLE_BTN_TGL_PR:
-            ext->styles_btn[LV_BTN_STATE_TGL_PR] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_TGL_PR], style);
             lv_obj_invalidate(btnm);
             break;
         case LV_BTNM_STYLE_BTN_INA:
-            ext->styles_btn[LV_BTN_STATE_INA] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_INA], style);
             lv_obj_invalidate(btnm);
             break;
     }
@@ -698,6 +698,7 @@ static lv_res_t lv_btnm_signal(lv_obj_t * btnm, lv_signal_t sign, void * param)
     lv_btnm_ext_t * ext = lv_obj_get_ext_attr(btnm);
     lv_point_t p;
     if(sign == LV_SIGNAL_CLEANUP) {
+        LV_REF_RELEASE_MULTIPLE(ext->styles_btn, sizeof(ext->styles_btn));
         lv_mem_free(ext->button_areas);
         lv_mem_free(ext->ctrl_bits);
     } else if(sign == LV_SIGNAL_STYLE_CHG || sign == LV_SIGNAL_CORD_CHG) {

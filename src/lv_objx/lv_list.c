@@ -89,11 +89,11 @@ lv_obj_t * lv_list_create(lv_obj_t * par, const lv_obj_t * copy)
     if(ext == NULL) return NULL;
 
     ext->style_img                        = NULL;
-    ext->styles_btn[LV_BTN_STATE_REL]     = &lv_style_btn_rel;
-    ext->styles_btn[LV_BTN_STATE_PR]      = &lv_style_btn_pr;
-    ext->styles_btn[LV_BTN_STATE_TGL_REL] = &lv_style_btn_tgl_rel;
-    ext->styles_btn[LV_BTN_STATE_TGL_PR]  = &lv_style_btn_tgl_pr;
-    ext->styles_btn[LV_BTN_STATE_INA]     = &lv_style_btn_ina;
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_REL], &lv_style_btn_rel);
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_PR], &lv_style_btn_pr);
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_TGL_REL], &lv_style_btn_tgl_rel);
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_TGL_PR], &lv_style_btn_tgl_pr);
+    LV_REF_INIT(ext->styles_btn[LV_BTN_STATE_INA], &lv_style_btn_ina);
     ext->anim_time                        = LV_LIST_DEF_ANIM_TIME;
     ext->single_mode                      = false;
     ext->size                             = 0;
@@ -359,23 +359,23 @@ void lv_list_set_style(lv_obj_t * list, lv_list_style_t type, const lv_style_t *
             lv_page_set_style(list, LV_PAGE_STYLE_EDGE_FLASH, style);
             break;
         case LV_LIST_STYLE_BTN_REL:
-            ext->styles_btn[LV_BTN_STATE_REL] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_REL], style);
             btn_style_refr                    = LV_BTN_STYLE_REL;
             break;
         case LV_LIST_STYLE_BTN_PR:
-            ext->styles_btn[LV_BTN_STATE_PR] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_PR], style);
             btn_style_refr                   = LV_BTN_STYLE_PR;
             break;
         case LV_LIST_STYLE_BTN_TGL_REL:
-            ext->styles_btn[LV_BTN_STATE_TGL_REL] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_TGL_REL], style);
             btn_style_refr                        = LV_BTN_STYLE_TGL_REL;
             break;
         case LV_LIST_STYLE_BTN_TGL_PR:
-            ext->styles_btn[LV_BTN_STATE_TGL_PR] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_TGL_PR], style);
             btn_style_refr                       = LV_BTN_STYLE_TGL_PR;
             break;
         case LV_LIST_STYLE_BTN_INA:
-            ext->styles_btn[LV_BTN_STATE_INA] = style;
+            LV_REF_REPLACE(ext->styles_btn[LV_BTN_STATE_INA], style);
             btn_style_refr                    = LV_BTN_STYLE_INA;
             break;
     }
@@ -916,6 +916,7 @@ static lv_res_t lv_list_btn_signal(lv_obj_t * btn, lv_signal_t sign, void * para
         lv_obj_t * sel  = lv_list_get_btn_selected(list);
         if(sel == btn) lv_list_set_btn_selected(list, lv_list_get_next_btn(list, btn));
 #endif
+        LV_REF_CLEANUP_MULTIPLE(ext->styles_btn, sizeof(ext->styles_btn));
     }
 
     return res;

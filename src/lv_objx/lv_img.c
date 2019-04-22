@@ -157,8 +157,11 @@ void lv_img_set_src(lv_obj_t * img, const void * src_img)
         /*If memory was allocated because of the previous `src_type` then free it*/
         if(ext->src_type == LV_IMG_SRC_FILE || ext->src_type == LV_IMG_SRC_SYMBOL) {
             lv_mem_free(ext->src);
+        } else if(ext->src_type == LV_IMG_SRC_VARIABLE) {
+            LV_REF_RELEASE(ext->src);
         }
-        ext->src = src_img;
+        
+        LV_REF_INIT(ext->src, src_img);
     } else if(src_type == LV_IMG_SRC_FILE || src_type == LV_IMG_SRC_SYMBOL) {
         /* If the new and the old src are the same then it was only a refresh.*/
         if(ext->src != src_img) {
@@ -413,6 +416,9 @@ static lv_res_t lv_img_signal(lv_obj_t * img, lv_signal_t sign, void * param)
         if(ext->src_type == LV_IMG_SRC_FILE || ext->src_type == LV_IMG_SRC_SYMBOL) {
             lv_mem_free(ext->src);
             ext->src      = NULL;
+            ext->src_type = LV_IMG_SRC_UNKNOWN;
+        } else if (ext->src_type == LV_IMG_SRC_VARIABLE) {
+            LV_REF_RELEASE(ext->src);
             ext->src_type = LV_IMG_SRC_UNKNOWN;
         }
     } else if(sign == LV_SIGNAL_STYLE_CHG) {

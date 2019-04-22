@@ -96,7 +96,7 @@ lv_obj_t * lv_ddlist_create(lv_obj_t * par, const lv_obj_t * copy)
     ext->sel_opt_id_ori = 0;
     ext->option_cnt     = 0;
     ext->anim_time      = LV_DDLIST_DEF_ANIM_TIME;
-    ext->sel_style      = &lv_style_plain_color;
+    LV_REF_INIT(ext->sel_style, &lv_style_plain_color);
     ext->draw_arrow     = 0; /*Do not draw arrow by default*/
     ext->stay_open      = 0;
 
@@ -139,7 +139,7 @@ lv_obj_t * lv_ddlist_create(lv_obj_t * par, const lv_obj_t * copy)
         ext->sel_opt_id_ori = copy_ext->sel_opt_id;
         ext->fix_height     = copy_ext->fix_height;
         ext->option_cnt     = copy_ext->option_cnt;
-        ext->sel_style      = copy_ext->sel_style;
+        LV_REF_REPLACE(ext->sel_style, copy_ext->sel_style);
         ext->anim_time      = copy_ext->anim_time;
         ext->draw_arrow     = copy_ext->draw_arrow;
         ext->stay_open      = copy_ext->stay_open;
@@ -301,7 +301,7 @@ void lv_ddlist_set_style(lv_obj_t * ddlist, lv_ddlist_style_t type, const lv_sty
             break;
         case LV_DDLIST_STYLE_SB: lv_page_set_style(ddlist, LV_PAGE_STYLE_SB, style); break;
         case LV_DDLIST_STYLE_SEL:
-            ext->sel_style  = style;
+            LV_REF_REPLACE(ext->sel_style, style);
             lv_obj_t * scrl = lv_page_get_scrl(ddlist);
             lv_obj_refresh_ext_draw_pad(scrl); /*Because of the wider selected rectangle*/
             break;
@@ -653,6 +653,7 @@ static lv_res_t lv_ddlist_signal(lv_obj_t * ddlist, lv_signal_t sign, void * par
         lv_ddlist_refr_size(ddlist, 0);
     } else if(sign == LV_SIGNAL_CLEANUP) {
         ext->label = NULL;
+        LV_REF_RELEASE(ext->sel_style);
     } else if(sign == LV_SIGNAL_FOCUS) {
 #if LV_USE_GROUP
         lv_group_t * g             = lv_obj_get_group(ddlist);

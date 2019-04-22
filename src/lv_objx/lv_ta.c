@@ -63,7 +63,7 @@ static lv_design_cb_t ancestor_design;
 static lv_design_cb_t scrl_design;
 static lv_signal_cb_t ancestor_signal;
 static lv_signal_cb_t scrl_signal;
-static const char * ta_insert_replace;
+static const char * ta_insert_replace=NULL;
 
 /**********************
  *      MACROS
@@ -145,9 +145,9 @@ lv_obj_t * lv_ta_create(lv_obj_t * par, const lv_obj_t * copy)
         lv_ta_ext_t * copy_ext = lv_obj_get_ext_attr(copy);
         ext->label             = lv_label_create(new_ta, copy_ext->label);
         ext->pwd_mode          = copy_ext->pwd_mode;
-        ext->accapted_chars    = copy_ext->accapted_chars;
+        LV_REF_REPLACE(ext->accapted_chars, copy_ext->accapted_chars);
         ext->max_length        = copy_ext->max_length;
-        ext->cursor.style      = copy_ext->cursor.style;
+        LV_REF_REPLACE(ext->cursor.style, copy_ext->cursor.style);
         ext->cursor.pos        = copy_ext->cursor.pos;
         ext->cursor.valid_x    = copy_ext->cursor.valid_x;
         ext->cursor.type       = copy_ext->cursor.type;
@@ -733,7 +733,7 @@ void lv_ta_set_accepted_chars(lv_obj_t * ta, const char * list)
 {
     lv_ta_ext_t * ext = lv_obj_get_ext_attr(ta);
 
-    ext->accapted_chars = list;
+    LV_REF_REPLACE(ext->accapted_chars, list);
 }
 
 /**
@@ -759,7 +759,7 @@ void lv_ta_set_max_length(lv_obj_t * ta, uint16_t num)
 void lv_ta_set_insert_replace(lv_obj_t * ta, const char * txt)
 {
     (void)ta; /*Unused*/
-    ta_insert_replace = txt;
+    LV_REF_REPLACE(ta_insert_replace, txt);
 }
 
 /**
@@ -777,7 +777,7 @@ void lv_ta_set_style(lv_obj_t * ta, lv_ta_style_t type, const lv_style_t * style
         case LV_TA_STYLE_SB: lv_page_set_style(ta, LV_PAGE_STYLE_SB, style); break;
         case LV_TA_STYLE_EDGE_FLASH: lv_page_set_style(ta, LV_PAGE_STYLE_EDGE_FLASH, style); break;
         case LV_TA_STYLE_CURSOR:
-            ext->cursor.style = style;
+            LV_REF_REPLACE(ext->cursor.style, style);
             lv_obj_refresh_ext_draw_pad(
                 lv_page_get_scrl(ta)); /*Refresh ext. size because of cursor drawing*/
             refr_cursor_area(ta);
@@ -1212,7 +1212,8 @@ static lv_res_t lv_ta_signal(lv_obj_t * ta, lv_signal_t sign, void * param)
     lv_ta_ext_t * ext = lv_obj_get_ext_attr(ta);
     if(sign == LV_SIGNAL_CLEANUP) {
         if(ext->pwd_tmp != NULL) lv_mem_free(ext->pwd_tmp);
-
+        LV_REF_RELEASE(ext->accepted_chars);
+        LV_REF_RELEASE(ext->cursor.style);
         /* (The created label will be deleted automatically) */
     } else if(sign == LV_SIGNAL_STYLE_CHG) {
         if(ext->label) {

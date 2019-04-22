@@ -428,7 +428,7 @@ void lv_chart_set_x_ticks(lv_obj_t * chart, const char * list_of_values, uint8_t
 {
     lv_chart_ext_t * ext       = lv_obj_get_ext_attr(chart);
     ext->x_axis.num_tick_marks = num_tick_marks;
-    ext->x_axis.list_of_values = list_of_values;
+    LV_REF_REPLACE(ext->x_axis.list_of_values, list_of_values);
     ext->x_axis.major_tick_len = major_tick_len;
     ext->x_axis.minor_tick_len = minor_tick_len;
     ext->x_axis.options        = options;
@@ -440,7 +440,7 @@ void lv_chart_set_y_ticks(lv_obj_t * chart, const char * list_of_values, uint8_t
 {
     lv_chart_ext_t * ext       = lv_obj_get_ext_attr(chart);
     ext->y_axis.num_tick_marks = num_tick_marks;
-    ext->y_axis.list_of_values = list_of_values;
+    LV_REF_REPLACE(ext->y_axis.list_of_values, list_of_values);
     ext->y_axis.major_tick_len = major_tick_len;
     ext->y_axis.minor_tick_len = minor_tick_len;
     ext->y_axis.options        = options;
@@ -589,6 +589,10 @@ static lv_res_t lv_chart_signal(lv_obj_t * chart, lv_signal_t sign, void * param
             lv_mem_free(*datal);
         }
         lv_ll_clear(&ext->series_ll);
+        
+        LV_REF_RELEASE(ext->x_axis.list_of_values);
+        LV_REF_RELEASE(ext->y_axis.list_of_values);
+        
     } else if(sign == LV_SIGNAL_GET_TYPE) {
         lv_obj_type_t * buf = param;
         uint8_t i;

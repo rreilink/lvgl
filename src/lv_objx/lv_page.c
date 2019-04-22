@@ -84,7 +84,7 @@ lv_obj_t * lv_page_create(lv_obj_t * par, const lv_obj_t * copy)
     ext->scrl                 = NULL;
     ext->sb.hor_draw          = 0;
     ext->sb.ver_draw          = 0;
-    ext->sb.style             = &lv_style_pretty;
+    LV_REF_INIT(ext->sb.style, &lv_style_pretty);
     ext->sb.mode              = LV_SB_MODE_AUTO;
     ext->edge_flash.enabled   = 0;
     ext->edge_flash.bottom_ip = 0;
@@ -92,7 +92,7 @@ lv_obj_t * lv_page_create(lv_obj_t * par, const lv_obj_t * copy)
     ext->edge_flash.left_ip   = 0;
     ext->edge_flash.right_ip  = 0;
     ext->edge_flash.state     = 0;
-    ext->edge_flash.style     = &lv_style_plain_color;
+    LV_REF_INIT(ext->edge_flash.style, &lv_style_plain_color);
     ext->arrow_scroll         = 0;
     ext->scroll_prop          = 0;
     ext->scroll_prop_ip       = 0;
@@ -251,14 +251,14 @@ void lv_page_set_style(lv_obj_t * page, lv_page_style_t type, const lv_style_t *
         case LV_PAGE_STYLE_BG: lv_obj_set_style(page, style); break;
         case LV_PAGE_STYLE_SCRL: lv_obj_set_style(ext->scrl, style); break;
         case LV_PAGE_STYLE_SB:
-            ext->sb.style = style;
+            LV_REF_REPLACE(ext->sb.style, style);
             lv_area_set_height(&ext->sb.hor_area, ext->sb.style->body.padding.inner);
             lv_area_set_width(&ext->sb.ver_area, ext->sb.style->body.padding.inner);
             lv_page_sb_refresh(page);
             lv_obj_refresh_ext_draw_pad(page);
             lv_obj_invalidate(page);
             break;
-        case LV_PAGE_STYLE_EDGE_FLASH: ext->edge_flash.style = style; break;
+        case LV_PAGE_STYLE_EDGE_FLASH:  LV_REF_REPLACE(ext->edge_flash.style, style); break;
     }
 }
 
@@ -850,6 +850,9 @@ static lv_res_t lv_page_signal(lv_obj_t * page, lv_signal_t sign, void * param)
             if(buf->type[i] == NULL) break;
         }
         buf->type[i] = "lv_page";
+    } else if(sign == LV_SIGNAL_CLEANUP) {
+        LV_REF_RELEASE(ext->sb.style);
+        LV_REF_RELEASE(ext->edge_flash.style);
     }
 
     return res;

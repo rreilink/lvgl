@@ -78,7 +78,7 @@ lv_obj_t * lv_bar_create(lv_obj_t * par, const lv_obj_t * copy)
     ext->anim_end    = 0;
     ext->anim_state  = LV_BAR_ANIM_STATE_INV;
     ext->sym         = 0;
-    ext->style_indic = &lv_style_pretty_color;
+    LV_REF_INIT(ext->style_indic, &lv_style_pretty_color);
 
     lv_obj_set_signal_cb(new_bar, lv_bar_signal);
     lv_obj_set_design_cb(new_bar, lv_bar_design);
@@ -222,7 +222,7 @@ void lv_bar_set_style(lv_obj_t * bar, lv_bar_style_t type, const lv_style_t * st
     switch(type) {
         case LV_BAR_STYLE_BG: lv_obj_set_style(bar, style); break;
         case LV_BAR_STYLE_INDIC:
-            ext->style_indic = style;
+            LV_REF_REPLACE(ext->style_indic, style);
             lv_obj_refresh_ext_draw_pad(bar);
             break;
     }
@@ -470,6 +470,8 @@ static lv_res_t lv_bar_signal(lv_obj_t * bar, lv_signal_t sign, void * param)
             if(buf->type[i] == NULL) break;
         }
         buf->type[i] = "lv_bar";
+    } else if(sign == LV_SIGNAL_CLEANUP) {
+        LV_REF_RELEASE(ext->style_indic);
     }
 
     return res;

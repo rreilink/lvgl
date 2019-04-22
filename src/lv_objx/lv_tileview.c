@@ -157,7 +157,7 @@ void lv_tileview_add_element(lv_obj_t * tileview, lv_obj_t * element)
 void lv_tileview_set_valid_positions(lv_obj_t * tileview, const lv_point_t * valid_pos)
 {
     lv_tileview_ext_t * ext = lv_obj_get_ext_attr(tileview);
-    ext->valid_pos          = valid_pos;
+    LV_REF_REPLACE(ext->valid_pos, valid_pos);
 
     /*If valid pos. is selected do nothing*/
     uint16_t i;
@@ -309,8 +309,11 @@ static lv_res_t lv_tileview_signal(lv_obj_t * tileview, lv_signal_t sign, void *
     res = ancestor_signal(tileview, sign, param);
     if(res != LV_RES_OK) return res;
 
+    lv_tileview_ext_t * ext = lv_obj_get_ext_attr(tileview);
+
     if(sign == LV_SIGNAL_CLEANUP) {
-        /*Nothing to cleanup. (No dynamically allocated memory in 'ext')*/
+        LV_REF_RELEASE(ext->valid_pos);
+        /*Nothing else to cleanup. (No dynamically allocated memory in 'ext')*/
     } else if(sign == LV_SIGNAL_GET_TYPE) {
         lv_obj_type_t * buf = param;
         uint8_t i;

@@ -109,7 +109,7 @@ lv_obj_t * lv_line_create(lv_obj_t * par, const lv_obj_t * copy)
 void lv_line_set_points(lv_obj_t * line, const lv_point_t * point_a, uint16_t point_num)
 {
     lv_line_ext_t * ext = lv_obj_get_ext_attr(line);
-    ext->point_array    = point_a;
+    LV_REF_REPLACE(ext->point_array, point_a);
     ext->point_num      = point_num;
 
     if(point_num > 0 && ext->auto_size != 0) {
@@ -288,6 +288,8 @@ static lv_res_t lv_line_signal(lv_obj_t * line, lv_signal_t sign, void * param)
     res = ancestor_signal(line, sign, param);
     if(res != LV_RES_OK) return res;
 
+    lv_line_ext_t * ext = lv_obj_get_ext_attr(line);
+    
     if(sign == LV_SIGNAL_GET_TYPE) {
         lv_obj_type_t * buf = param;
         uint8_t i;
@@ -298,6 +300,8 @@ static lv_res_t lv_line_signal(lv_obj_t * line, lv_signal_t sign, void * param)
     } else if(sign == LV_SIGNAL_REFR_EXT_DRAW_PAD) {
         const lv_style_t * style = lv_line_get_style(line);
         if(line->ext_draw_pad < style->line.width) line->ext_draw_pad = style->line.width;
+    } else if(sign == LV_SIGNAL_CLEANUP) {
+        LV_REF_RELEASE(ext->point_array);
     }
 
     return res;

@@ -71,7 +71,7 @@ lv_obj_t * lv_slider_create(lv_obj_t * par, const lv_obj_t * copy)
 
     /*Initialize the allocated 'ext' */
     ext->drag_value = LV_SLIDER_NOT_PRESSED;
-    ext->style_knob = &lv_style_pretty;
+    LV_REF_INIT(ext->style_knob, &lv_style_pretty);
     ext->knob_in    = 0;
 
     /*The signal and design functions are not copied so set them here*/
@@ -96,7 +96,7 @@ lv_obj_t * lv_slider_create(lv_obj_t * par, const lv_obj_t * copy)
     /*Copy an existing slider*/
     else {
         lv_slider_ext_t * copy_ext = lv_obj_get_ext_attr(copy);
-        ext->style_knob            = copy_ext->style_knob;
+        LV_REF_REPLACE(ext->style_knob, copy_ext->style_knob);
         ext->knob_in               = copy_ext->knob_in;
         /*Refresh the style with new signal function*/
         lv_obj_refresh_style(new_slider);
@@ -140,7 +140,7 @@ void lv_slider_set_style(lv_obj_t * slider, lv_slider_style_t type, const lv_sty
         case LV_SLIDER_STYLE_BG: lv_bar_set_style(slider, LV_BAR_STYLE_BG, style); break;
         case LV_SLIDER_STYLE_INDIC: lv_bar_set_style(slider, LV_BAR_STYLE_INDIC, style); break;
         case LV_SLIDER_STYLE_KNOB:
-            ext->style_knob = style;
+            LV_REF_REPLACE(ext->style_knob, style);
             lv_obj_refresh_ext_draw_pad(slider);
             break;
     }
@@ -579,6 +579,8 @@ static lv_res_t lv_slider_signal(lv_obj_t * slider, lv_signal_t sign, void * par
             if(buf->type[i] == NULL) break;
         }
         buf->type[i] = "lv_slider";
+    } else if(sign == LV_SIGNAL_CLEANUP) {
+        LV_REF_RELEASE(ext->style_knob);
     }
 
     return res;

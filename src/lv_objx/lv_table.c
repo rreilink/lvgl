@@ -68,10 +68,10 @@ lv_obj_t * lv_table_create(lv_obj_t * par, const lv_obj_t * copy)
 
     /*Initialize the allocated 'ext' */
     ext->cell_data     = NULL;
-    ext->cell_style[0] = &lv_style_plain;
-    ext->cell_style[1] = &lv_style_plain;
-    ext->cell_style[2] = &lv_style_plain;
-    ext->cell_style[3] = &lv_style_plain;
+    LV_REF_INIT(ext->cell_style[0], &lv_style_plain);
+    LV_REF_INIT(ext->cell_style[1], &lv_style_plain);
+    LV_REF_INIT(ext->cell_style[2], &lv_style_plain);
+    LV_REF_INIT(ext->cell_style[3], &lv_style_plain);
     ext->col_cnt       = 0;
     ext->row_cnt       = 0;
 
@@ -102,10 +102,10 @@ lv_obj_t * lv_table_create(lv_obj_t * par, const lv_obj_t * copy)
     /*Copy an existing table*/
     else {
         lv_table_ext_t * copy_ext = lv_obj_get_ext_attr(copy);
-        ext->cell_style[0]        = copy_ext->cell_style[0];
-        ext->cell_style[1]        = copy_ext->cell_style[1];
-        ext->cell_style[2]        = copy_ext->cell_style[2];
-        ext->cell_style[3]        = copy_ext->cell_style[3];
+        LV_REF_REPLACE(ext->cell_style[0], copy_ext->cell_style[0]);
+        LV_REF_REPLACE(ext->cell_style[1], copy_ext->cell_style[1]);
+        LV_REF_REPLACE(ext->cell_style[2], copy_ext->cell_style[2]);
+        LV_REF_REPLACE(ext->cell_style[3], copy_ext->cell_style[3]);
         ext->col_cnt              = copy_ext->col_cnt;
         ext->row_cnt              = copy_ext->row_cnt;
 
@@ -375,19 +375,19 @@ void lv_table_set_style(lv_obj_t * table, lv_table_style_t type, const lv_style_
             refr_size(table);
             break;
         case LV_TABLE_STYLE_CELL1:
-            ext->cell_style[0] = style;
+            LV_REF_REPLACE(ext->cell_style[0], style);
             refr_size(table);
             break;
         case LV_TABLE_STYLE_CELL2:
-            ext->cell_style[1] = style;
+            LV_REF_REPLACE(ext->cell_style[1], style);
             refr_size(table);
             break;
         case LV_TABLE_STYLE_CELL3:
-            ext->cell_style[2] = style;
+            LV_REF_REPLACE(ext->cell_style[2], style);
             refr_size(table);
             break;
         case LV_TABLE_STYLE_CELL4:
-            ext->cell_style[3] = style;
+            LV_REF_REPLACE(ext->cell_style[3], style);
             refr_size(table);
             break;
     }
@@ -758,6 +758,9 @@ static lv_res_t lv_table_signal(lv_obj_t * table, lv_signal_t sign, void * param
                 ext->cell_data[cell] = NULL;
             }
         }
+        
+        LV_REF_RELEASE_MULTIPLE(ext->cell_style, sizeof(ext->cell_style));
+        
     } else if(sign == LV_SIGNAL_GET_TYPE) {
         lv_obj_type_t * buf = param;
         uint8_t i;

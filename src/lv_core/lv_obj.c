@@ -242,9 +242,9 @@ lv_obj_t * lv_obj_create(lv_obj_t * parent, const lv_obj_t * copy)
         /*Set appearance*/
         lv_theme_t * th = lv_theme_get_current();
         if(th) {
-            new_obj->style_p = th->style.panel;
+            LV_REF_INIT(new_obj->style_p, th->style.panel);
         } else {
-            new_obj->style_p = &lv_style_plain_color;
+            LV_REF_INIT(new_obj->style_p, &lv_style_plain_color);
         }
 
         /*Set the callbacks*/
@@ -343,7 +343,7 @@ lv_obj_t * lv_obj_create(lv_obj_t * parent, const lv_obj_t * copy)
         new_obj->protect      = copy->protect;
         new_obj->opa_scale    = copy->opa_scale;
 
-        new_obj->style_p = copy->style_p;
+        LV_REF_REPLACE(new_obj->style_p, copy->style_p);
 
 #if LV_USE_GROUP
         /*Add to the same group*/
@@ -1072,7 +1072,7 @@ void lv_obj_set_ext_click_area(lv_obj_t * obj, lv_coord_t left, lv_coord_t right
  */
 void lv_obj_set_style(lv_obj_t * obj, const lv_style_t * style)
 {
-    obj->style_p = style;
+    LV_REF_REPLACE(obj->style_p, style);
 
     /*Send a signal about style change to every children with NULL style*/
     refresh_children_style(obj);
@@ -2104,6 +2104,8 @@ static lv_res_t lv_obj_signal(lv_obj_t * obj, lv_signal_t sign, void * param)
     } else if(sign == LV_SIGNAL_GET_TYPE) {
         lv_obj_type_t * buf = param;
         buf->type[0]        = "lv_obj";
+    } else if(sign == LV_SIGNAL_CLEANUP) {
+        LV_REF_RELEASE(style);
     }
 
     return res;

@@ -64,9 +64,9 @@ lv_obj_t * lv_win_create(lv_obj_t * par, const lv_obj_t * copy)
     ext->page          = NULL;
     ext->header        = NULL;
     ext->title         = NULL;
-    ext->style_header  = &lv_style_plain_color;
-    ext->style_btn_rel = &lv_style_btn_rel;
-    ext->style_btn_pr  = &lv_style_btn_pr;
+    LV_REF_INIT(ext->style_header, &lv_style_plain_color);
+    LV_REF_INIT(ext->style_btn_rel, &lv_style_btn_rel);
+    LV_REF_INIT(ext->style_btn_pr, &lv_style_btn_pr);
     ext->btn_size      = (LV_DPI) / 2;
 
     /*Init the new window object*/
@@ -279,8 +279,8 @@ void lv_win_set_style(lv_obj_t * win, lv_win_style_t type, const lv_style_t * st
             lv_obj_set_style(ext->header, style);
             lv_win_realign(win);
             break;
-        case LV_WIN_STYLE_BTN_REL: ext->style_btn_rel = style; break;
-        case LV_WIN_STYLE_BTN_PR: ext->style_btn_pr = style; break;
+        case LV_WIN_STYLE_BTN_REL: LV_REF_REPLACE(ext->style_btn_rel, style); break;
+        case LV_WIN_STYLE_BTN_PR: LV_REF_REPLACE(ext->style_btn_pr, style); break;
     }
 
     /*Refresh the existing buttons*/
@@ -488,6 +488,9 @@ static lv_res_t lv_win_signal(lv_obj_t * win, lv_signal_t sign, void * param)
         ext->header = NULL; /*These objects were children so they are already invalid*/
         ext->page   = NULL;
         ext->title  = NULL;
+        LV_REF_CLEANUP(ext->style_header);
+        LV_REF_CLEANUP(ext->style_btn_rel);
+        LV_REF_CLEANUP(ext->style_btn_pr);
     } else if(sign == LV_SIGNAL_CONTROL) {
         /*Forward all the control signals to the page*/
         ext->page->signal_cb(ext->page, sign, param);

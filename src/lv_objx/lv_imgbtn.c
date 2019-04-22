@@ -84,11 +84,11 @@ lv_obj_t * lv_imgbtn_create(lv_obj_t * par, const lv_obj_t * copy)
     else {
         lv_imgbtn_ext_t * copy_ext = lv_obj_get_ext_attr(copy);
 #if LV_IMGBTN_TILED == 0
-        memcpy(ext->img_src, copy_ext->img_src, sizeof(ext->img_src));
+        LV_REF_MEMCPY(ext->img_src, copy_ext->img_src, sizeof(ext->img_src));
 #else
-        memcpy(ext->img_src_left, copy_ext->img_src_left, sizeof(ext->img_src_left));
-        memcpy(ext->img_src_mid, copy_ext->img_src_mid, sizeof(ext->img_src_mid));
-        memcpy(ext->img_src_right, copy_ext->img_src_right, sizeof(ext->img_src_right));
+        LV_REF_MEMCPY(ext->img_src_left, copy_ext->img_src_left, sizeof(ext->img_src_left));
+        LV_REF_MEMCPY(ext->img_src_mid, copy_ext->img_src_mid, sizeof(ext->img_src_mid));
+        LV_REF_MEMCPY(ext->img_src_right, copy_ext->img_src_right, sizeof(ext->img_src_right));
 #endif
         /*Refresh the style with new signal function*/
         lv_obj_refresh_style(new_imgbtn);
@@ -114,7 +114,7 @@ void lv_imgbtn_set_src(lv_obj_t * imgbtn, lv_btn_state_t state, const void * src
 {
     lv_imgbtn_ext_t * ext = lv_obj_get_ext_attr(imgbtn);
 
-    ext->img_src[state] = src;
+    LV_REF_REPLACE(ext->img_src[state], src);
 
     refr_img(imgbtn);
 }
@@ -136,9 +136,9 @@ void lv_imgbtn_set_src(lv_obj_t * imgbtn, lv_btn_state_t state, const void * src
 {
     lv_imgbtn_ext_t * ext = lv_obj_get_ext_attr(imgbtn);
 
-    ext->img_src_left[state] = src_left;
-    ext->img_src_mid[state] = src_mid;
-    ext->img_src_right[state] = src_right;
+    LV_REF_REPLACE(ext->img_src_left[state], src_left);
+    LV_REF_REPLACE(ext->img_src_mid[state], src_mid);
+    LV_REF_REPLACE(ext->img_src_right[state], src_right);
 
     refr_img(imgbtn);
 }

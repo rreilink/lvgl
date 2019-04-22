@@ -114,7 +114,7 @@ void lv_canvas_set_buffer(lv_obj_t * canvas, void * buf, lv_coord_t w, lv_coord_
     ext->dsc.header.cf = cf;
     ext->dsc.header.w  = w;
     ext->dsc.header.h  = h;
-    ext->dsc.data      = buf;
+    LV_REF_REPLACE(ext->dsc.data, buf);
     ext->dsc.data_size = (lv_img_color_format_get_px_size(cf) * w * h) / 8;
 
     lv_img_set_src(canvas, &ext->dsc);
@@ -698,7 +698,8 @@ static lv_res_t lv_canvas_signal(lv_obj_t * canvas, lv_signal_t sign, void * par
     if(res != LV_RES_OK) return res;
 
     if(sign == LV_SIGNAL_CLEANUP) {
-        /*Nothing to cleanup. (No dynamically allocated memory in 'ext')*/
+        LV_REF_RELEASE(ext->dsc.data);
+        /*Nothing else to cleanup. (No dynamically allocated memory in 'ext')*/
     } else if(sign == LV_SIGNAL_GET_TYPE) {
         lv_obj_type_t * buf = param;
         uint8_t i;
